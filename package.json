@@ -11,9 +11,13 @@
     "vue": "latest"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.1",
     "nuxt": "^3.2.3"
   },
   "dependencies": {
-    "@pinia/nuxt": "^0.4.7"
+    "@pinia/nuxt": "^0.4.7",
+    "jsonwebtoken": "^9.0.0",
+    "mongodb": "^5.1.0",
+    "sass": "^1.59.2"
   }
 }

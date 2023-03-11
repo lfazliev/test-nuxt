@@ -11,7 +11,7 @@
     }
 
     transition: 300ms;
-    background: url('/src/assets/img/channels4_banner.jpg') 54% center/cover no-repeat;
+    background: url('@/public/img/channels4_banner.jpg') 54% center/cover no-repeat;
     height: 300px;
 
     >a {

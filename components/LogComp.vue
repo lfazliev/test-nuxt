@@ -21,7 +21,7 @@ export default {
             const data = new FormData();
             data.append("login", this.login.toLocaleLowerCase());
             data.append("pwd", this.pwd);
-            const response = await fetch(`${this.dburl}/login`, {
+            const response = await $fetch(`${this.dburl}/login`, {
                 method: "POST",
                 body: data,
             });

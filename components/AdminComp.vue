@@ -34,7 +34,7 @@ export default {
     },
     props: ['isAdmin'],
     async beforeMount() {
-        const data = await fetch(`${this.dburl}/posts`);
+        const data = await useFetch(`${this.dburl}/posts`);
         const posts = await data.json();
         this.postsStore.posts = posts.all;
     },
@@ -64,7 +64,7 @@ export default {
                 data.append("url", this.url);
                 data.append('date', this.date)
                 const token = localStorage.getItem('token');
-                const result = await fetch(`${this.dburl}/posts`, {
+                const result = await $fetch(`${this.dburl}/posts`, {
                     method: "POST",
                     headers: {
                         "Authorization": token
