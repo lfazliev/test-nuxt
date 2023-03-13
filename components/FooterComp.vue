@@ -83,32 +83,32 @@ footer {
             }
 
             a.fb {
-                background: url('@/public/imgfoot/fb_gray.png') center/cover no-repeat;
+                background: url('@/assets/imgfoot/fb_gray.png') center/cover no-repeat;
                 transition: 300ms;
             }
 
             a.fb:hover {
-                background: url('@/public/imgfoot/fb.png') center/cover no-repeat;
+                background: url('@/assets/imgfoot/fb.png') center/cover no-repeat;
                 transition: 300ms;
             }
 
             a.yt {
-                background: url('@/public/imgfoot/youtube_gray.png') center/cover no-repeat;
+                background: url('@/assets/imgfoot/youtube_gray.png') center/cover no-repeat;
                 transition: 300ms;
             }
 
             a.yt:hover {
-                background: url('@/public/imgfoot/youtube.png') center/cover no-repeat;
+                background: url('@/assets/imgfoot/youtube.png') center/cover no-repeat;
                 transition: 300ms;
             }
 
             a.vk {
-                background: url('@/public/imgfoot/vkgray.svg') center/cover no-repeat;
+                background: url('@/assets/imgfoot/vkgray.svg') center/cover no-repeat;
                 transition: 300ms;
             }
 
             a.vk:hover {
-                background: url('@/public/imgfoot/vk.svg') center/cover no-repeat;
+                background: url('@/assets/imgfoot/vk.svg') center/cover no-repeat;
                 transition: 300ms;
             }
         }
