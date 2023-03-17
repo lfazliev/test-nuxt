@@ -1,6 +1,6 @@
 <template>
     <div class="admin">
-        <button @click="this.$emit('changeIsAdmin', false)">Log out</button>
+        <button @click="$emit('changeIsAdmin', false)">Log out</button>
         <input v-model="title" type="text" placeholder="Header" />
         <button @click="fileName = ''; file = null; src = '' " v-if="file">Delete an image</button>
         <input v-model="url" type="url" placeholder="Link for ex 'lfazlev.com'" />
@@ -15,7 +15,74 @@
         <button @click="addPost">Add a post</button>
     </div>
 </template>
-<script>
+<script setup lang="ts">
+// import { usePostsStore } from "../stores/posts";
+// const dburl = 'https://blog.lfazliev.com'
+// // const dburl = 'http://localhost:3002'
+// const date = ref(new Date().toLocaleDateString())
+// let title = ref("")
+// let text = ref("")
+// let url = ref("")
+// let src = ref("")
+// let file = ref(null)
+// let fileName = ref("")
+// // props: ['isAdmin'],
+// onBeforeMount(async () => {
+//     const data = await useFetch(`${dburl}/posts`);
+//     const posts = await data.json();
+//     postsStore.posts = posts.all;
+// })
+// const previewFiles = (event: any) => {
+//     const allowedTypes = ['image/jpg', 'image/png', 'image/gif', 'image/jpeg']
+//     const file = event.target.files[0]
+//     if (allowedTypes.includes(file.type)) {
+//         const fileExtension = file.name.split('.').pop();
+//         const editFile = new File([file], `${new Date().getTime()}.${fileExtension}`, { type: file.type })
+//         file.value = editFile;
+//         fileName.value = file.name;
+//         src.value = editFile.name;
+//     }
+// }
+// const addPost = async () => {
+//     if (title.value != '' && text.value != '') {
+//         const data = new FormData();
+//         if (file.value) {
+//             data.append("file", file.value);
+//         }
+//         else {
+//             data.append("file", '');
+//         }
+//         data.append("title", title.value);
+//         data.append("text", text.value);
+//         data.append("url", url.value);
+//         data.append('date', date.value)
+//         const token = localStorage.getItem('token');
+//         const result = await useFetch(`${dburl}/posts`, {
+//             method: "POST",
+//             headers: {
+//                 "Authorization": token
+//             },
+//             body: data,
+//         });
+//         const insertRes = await result.json();
+//         if (insertRes != 'false') {
+//             postsStore.createPost(title.value, date.value, text.value, url.value, src.value, insertRes.result.insertedId)
+//             title.value = "";
+//             text.value = "";
+//             url.value = "";
+//             file.value = null;
+//             fileName.value = "Choose file";
+//         }
+//         else {
+//             const emit = defineEmits(['changeIsAdmin'])
+//             emit('changeIsAdmin', false)
+//         }
+//     }
+// }
+// };
+</script>
+
+<script lang="ts">
 import { usePostsStore } from "../stores/posts";
 import { mapStores } from "pinia";
 export default {
@@ -28,18 +95,18 @@ export default {
             text: "",
             url: "",
             src: "",
-            file: null,
+            file: null as any,
             fileName: "",
         };
     },
     props: ['isAdmin'],
     async beforeMount() {
-        const data = await useFetch(`${this.dburl}/posts`);
+        const data = await fetch(`${this.dburl}/posts`);
         const posts = await data.json();
         this.postsStore.posts = posts.all;
     },
     methods: {
-        previewFiles(event) {
+        previewFiles(event: any) {
             const allowedTypes = ['image/jpg', 'image/png', 'image/gif', 'image/jpeg']
             const file = event.target.files[0]
             if (allowedTypes.includes(file.type)) {
@@ -57,18 +124,17 @@ export default {
                     data.append("file", this.file);
                 }
                 else {
-                    data.append("file", null);
+                    data.append("file", '');
                 }
                 data.append("title", this.title);
                 data.append("text", this.text);
                 data.append("url", this.url);
                 data.append('date', this.date)
                 const token = localStorage.getItem('token');
-                const result = await $fetch(`${this.dburl}/posts`, {
+                const result = await fetch(`${this.dburl}/posts`, {
                     method: "POST",
-                    headers: {
-                        "Authorization": token
-                    },
+                    // @ts-ignore
+                    headers: { "Authorization": token },
                     body: data,
                 });
                 const insertRes = await result.json();
@@ -89,6 +155,7 @@ export default {
     computed: { ...mapStores(usePostsStore) },
 };
 </script>
+
 <style lang = 'scss'>
 .admin {
 

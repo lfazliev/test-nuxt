@@ -5,35 +5,29 @@
         <button type="submit" @click="sendUser()">Send</button>
     </form>
 </template>
-<script>
-export default {
-    data() {
-        return {
-            login: '',
-            pwd: '',
-            dburl: 'https://blog.lfazliev.com',
-            // dburl: 'http://localhost:3002',
-        }
-    },
-    props: ['isAdmin'],
-    methods: {
-        sendUser: async function () {
-            const data = new FormData();
-            data.append("login", this.login.toLocaleLowerCase());
-            data.append("pwd", this.pwd);
-            const response = await $fetch(`${this.dburl}/login`, {
-                method: "POST",
-                body: data,
-            });
-            const result = await response.text()
-            if (result == 'true') {
-                localStorage.setItem('token', response.headers.get('Authorization'))
-                this.$emit('changeIsAdmin', true)
-            }
-            else {
-                console.log("wrong login or password");
-            }
-        }
+<script setup lang="ts">
+
+let login = ref('')
+let pwd = ref('')
+const dburl = 'https://blog.lfazliev.com'
+// const dburl = 'http://localhost:3002'
+// props: ['isAdmin'],
+const sendUser = async () => {
+    const data = new FormData();
+    data.append("login", login.value.toLocaleLowerCase());
+    data.append("pwd", pwd.value);
+    const response = await $fetch(`${dburl}/login`, {
+        method: "POST",
+        body: data,
+    });
+    const result = await response.text()
+    if (result == 'true') {
+        localStorage.setItem('token', response.headers.get('Authorization'))
+        const emit = defineEmits(['changeIsAdmin'])
+        emit('changeIsAdmin', true)
+    }
+    else {
+        console.log("wrong login or password");
     }
 }
 </script>

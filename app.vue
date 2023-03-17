@@ -1,18 +1,12 @@
-<script setup>
-import HeaderC from './components/HeaderComp.vue'
-import FooterC from './components/FooterComp.vue'
-import Admin from './components/AdminComp.vue'
-import Login from './components/LogComp.vue'
-</script>
 <template>
   <main>
-    <HeaderC></HeaderC>
+    <HeaderComp></HeaderComp>
     <div class=visibl>
       <div v-if="isAdmin">
-        <Admin :isAdmin="isAdmin" @changeIsAdmin="changeIsAdmin"></Admin>
+        <AdminComp :isAdmin="isAdmin" @changeIsAdmin="changeIsAdmin"></AdminComp>
       </div>
       <div v-else class=logcont>
-        <Login v-if="showlogin" :isAdmin="isAdmin" @changeIsAdmin="changeIsAdmin"></Login>
+        <LogComp v-if="showlogin" :isAdmin="isAdmin" @changeIsAdmin="changeIsAdmin"></LogComp>
         <button @click="showlogin = !showlogin">{{ (showlogin == true) ? 'Hide login' : 'Login' }}</button>
       </div>
       <div class="postline">
@@ -56,146 +50,137 @@ import Login from './components/LogComp.vue'
       </div>
     </div>
   </main>
-  <FooterC class=visibl></FooterC>
+  <FooterComp class=visibl></FooterComp>
 </template>
 
-<script>
-
+<script setup lang="ts">
 import { usePostsStore } from "./stores/posts";
-import { mapStores } from "pinia";
-export default {
-  components: {
-    Login,
-    Admin
-  },
-  data() {
-    return {
-      showlogin: false,
-      isAdmin: false,
-      dburl: 'https://blog.lfazliev.com',
-      // dburl: 'http://localhost:3002',
-      titledit: "",
-      textedit: "",
-      urledit: "",
-      editId: '',
-      fileEditName: '',
-      editSrc: "",
-      fileEdit: null
-    };
-  },
-  async beforeMount() {
-    const data = await fetch(`${this.dburl}/posts`);
-    const posts = await data.json();
-    this.postsStore.posts = posts.all;
+const postsStore = usePostsStore()
+let showlogin = ref(false)
+let isAdmin = ref(false)
+const dburl = 'https://blog.lfazliev.com'
+// const dburl = 'http://localhost:3002'
+let titledit = ref("")
+let textedit = ref("")
+let urledit = ref("")
+let editId = ref("")
+let fileEditName = ref("")
+let editSrc = ref("")
+let fileEdit = reactive({}) as any
+onBeforeMount(async () => {
+  const data = await fetch(`${dburl}/posts`);
+  const posts = await data.json();
+  postsStore.posts = posts.all;
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${dburl}/checkjwt`, {
+    headers: {
+      "Content-Type": "application/json;charset=utf-8",
+      "Authorization": token,
+    },
+    method: "POST",
+  });
+  const result = await response.text()
+  if (result != 'false') {
+    isAdmin.value = true
+  }
+})
+const logout = () => {
+  localStorage.removeItem('token')
+  isAdmin.value = false
+}
+const changeIsAdmin = (newValue: any) => {
+  if (newValue == false) {
+    localStorage.removeItem('token')
+  }
+  isAdmin.value = newValue
+}
+const previewEditFiles = (event: any) => {
+  const allowedTypes = ['image/jpg', 'image/png', 'image/gif', 'image/jpeg']
+  const file = event.target.files[0]
+  if (allowedTypes.includes(file.type)) {
+    const fileExtension = file.name.split('.').pop();
+    const editFile = new File([file], `${new Date().getTime()}.${fileExtension}`, { type: file.type })
+    fileEdit = editFile
+    fileEditName.value = file.name;
+    editSrc.value = editFile.name;
+  }
+}
+const delPost = async (p: any) => {
+  postsStore.delel(p._id)
+  const token = localStorage.getItem('token') as string | undefined
+  const headers = useRequestHeaders(['Authorization'])
+  const result = await useFetch(`${dburl}/posts`,
+    {
+      method: "delete",
+      body: { p },
+      headers: { 'Authorization': token }
+    }
+    // headers: {
+    //   "Content-Type": "application/json;charset=utf-8",
+    //   "Authorization": token,
+    // },
+    // body: JSON.stringify({ p }),
+  );
+  const insertRes = await result.;
+  if (insertRes == false) {
+    isAdmin.value = false
+  }
+}
+const savePost = async (_id: any) => {
+  if (titledit.value != '' && textedit.value != '') {
+    let post = postsStore.findpost(_id);
+    post.title = titledit.value
+    post.text = textedit.value
+    post.url = urledit.value
+    const data = new FormData();
+    data.append("src", post.src);
+    if (fileEditName.value == '' && post.src) {
+      data.append("file", 'delete');
+      post.src = ''
+    }
+    else {
+      data.append("file", (fileEdit) ? fileEdit : null);
+    }
+    data.append("title", post.title);
+    data.append("text", post.text);
+    data.append("data", new Date().toLocaleDateString());
+    data.append("url", post.url);
+    data.append("_id", post._id);
+    editId.value = '';
     const token = localStorage.getItem('token');
-    const response = await fetch(`${this.dburl}/checkjwt`, {
+    const result = await fetch(`${dburl}/posts`, {
       headers: {
-        "Content-Type": "application/json;charset=utf-8",
         "Authorization": token,
       },
-      method: "POST",
-    });
-    const result = await response.text()
-    if (result != 'false') {
-      this.isAdmin = true
+      method: 'PUT',
+      body: data,
+    })
+    const insertRes = await result.json()
+    if (insertRes == 'false') {
+      isAdmin.value = false
     }
-  },
-  methods: {
-    logout() {
-      localStorage.removeItem('token')
-      this.isAdmin = false
-    },
-    changeIsAdmin(newValue) {
-      if (newValue == false) {
-        localStorage.removeItem('token')
-      }
-      this.isAdmin = newValue
-    },
-    previewEditFiles(event) {
-      const allowedTypes = ['image/jpg', 'image/png', 'image/gif', 'image/jpeg']
-      const file = event.target.files[0]
-      if (allowedTypes.includes(file.type)) {
-        const fileExtension = file.name.split('.').pop();
-        const editFile = new File([file], `${new Date().getTime()}.${fileExtension}`, { type: file.type })
-        this.fileEdit = editFile
-        this.fileEditName = file.name;
-        this.editSrc = editFile.name;
-      }
-    },
-    delPost: async function (p) {
-      this.postsStore.delel(p._id)
-      const token = localStorage.getItem('token');
-      const result = await fetch(`${this.dburl}/posts`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json;charset=utf-8",
-          "Authorization": token,
-        },
-        body: JSON.stringify({ p }),
-      });
-      const insertRes = await result.json();
-      if (insertRes == false) {
-        this.isAdmin = false
-      }
-    },
-    savePost: async function (_id) {
-      if (this.titledit != '' && this.textedit != '') {
-        let post = this.postsStore.findpost(_id);
-        post.title = this.titledit
-        post.text = this.textedit
-        post.url = this.urledit
-        const data = new FormData();
-        data.append("src", post.src);
-        if (this.fileEditName == '' && post.src) {
-          data.append("file", 'delete');
-          post.src = ''
-        }
-        else {
-          data.append("file", (this.fileEdit) ? this.fileEdit : null);
-        }
-        data.append("title", post.title);
-        data.append("text", post.text);
-        data.append("data", new Date().toLocaleDateString());
-        data.append("url", post.url);
-        data.append("_id", post._id);
-        this.editId = '';
-        const token = localStorage.getItem('token');
-        const result = await fetch(`${this.dburl}/posts`, {
-          headers: {
-            "Authorization": token,
-          },
-          method: 'PUT',
-          body: data,
-        })
-        const insertRes = await result.json()
-        if (insertRes == 'false') {
-          this.isAdmin = false
-        }
-        if (this.fileEdit) {
-          post.src = this.editSrc
-        }
-        this.fileEdit = null
-      }
-      else {
-        alert('Fill in the text and title fields')
-      }
-    },
-    editPost: async function (_id) {
-      if (this.editId == '') {
-        this.editId = _id;
-        let post = this.postsStore.findpost(_id);
-        this.titledit = post.title;
-        this.textedit = post.text;
-        this.urledit = post.url;
-        this.fileEditName = post.src
-      }
-      else {
-        alert('You havent finished editing another post')
-      }
-    },
-  },
-  computed: { ...mapStores(usePostsStore) },
-};
+    if (fileEdit) {
+      post.src = editSrc.value
+    }
+    fileEdit = File
+  }
+  else {
+    alert('Fill in the text and title fields')
+  }
+}
+const editPost = async (_id: any) => {
+  if (editId.value == '') {
+    editId.value = _id;
+    let post = postsStore.findpost(_id);
+    titledit.value = post.title;
+    textedit.value = post.text;
+    urledit.value = post.url;
+    fileEditName.value = post.src
+  }
+  else {
+    alert('You havent finished editing another post')
+  }
+}
 </script>
 
 <style  lang = 'scss'>
