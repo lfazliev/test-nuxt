@@ -53,26 +53,28 @@
   <FooterComp class=visibl></FooterComp>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { usePostsStore } from "./stores/posts";
 const postsStore = usePostsStore()
 let showlogin = ref(false)
 let isAdmin = ref(false)
-const dburl = 'https://blog.lfazliev.com'
-// const dburl = 'http://localhost:3002'
+// const dburl = 'https://blog.lfazliev.com'
+const dburl = 'http://localhost:3000'
 let titledit = ref("")
 let textedit = ref("")
 let urledit = ref("")
 let editId = ref("")
 let fileEditName = ref("")
 let editSrc = ref("")
-let fileEdit = reactive({}) as any
+let fileEdit = reactive({})
 onBeforeMount(async () => {
-  const data = await fetch(`${dburl}/posts`);
+  const data = await fetch(`${dburl}/api/posts`);
   const posts = await data.json();
+  console.log(posts);
+
   postsStore.posts = posts.all;
   const token = localStorage.getItem('token');
-  const response = await fetch(`${dburl}/checkjwt`, {
+  const response = await useFetch(`${dburl}/checkjwt`, {
     headers: {
       "Content-Type": "application/json;charset=utf-8",
       "Authorization": token,
@@ -88,13 +90,13 @@ const logout = () => {
   localStorage.removeItem('token')
   isAdmin.value = false
 }
-const changeIsAdmin = (newValue: any) => {
+const changeIsAdmin = (newValue) => {
   if (newValue == false) {
     localStorage.removeItem('token')
   }
   isAdmin.value = newValue
 }
-const previewEditFiles = (event: any) => {
+const previewEditFiles = (event) => {
   const allowedTypes = ['image/jpg', 'image/png', 'image/gif', 'image/jpeg']
   const file = event.target.files[0]
   if (allowedTypes.includes(file.type)) {
@@ -105,28 +107,25 @@ const previewEditFiles = (event: any) => {
     editSrc.value = editFile.name;
   }
 }
-const delPost = async (p: any) => {
+const delPost = async (p) => {
   postsStore.delel(p._id)
-  const token = localStorage.getItem('token') as string | undefined
+  const token = localStorage.getItem('token')
   const headers = useRequestHeaders(['Authorization'])
-  const result = await useFetch(`${dburl}/posts`,
-    {
-      method: "delete",
-      body: { p },
-      headers: { 'Authorization': token }
-    }
-    // headers: {
-    //   "Content-Type": "application/json;charset=utf-8",
-    //   "Authorization": token,
-    // },
-    // body: JSON.stringify({ p }),
+  const result = await useFetch(`${dburl}/posts`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json;charset=utf-8",
+      "Authorization": token,
+    },
+    body: JSON.stringify({ p }),
+  }
   );
-  const insertRes = await result.;
+  const insertRes = await result
   if (insertRes == false) {
     isAdmin.value = false
   }
 }
-const savePost = async (_id: any) => {
+const savePost = async (_id) => {
   if (titledit.value != '' && textedit.value != '') {
     let post = postsStore.findpost(_id);
     post.title = titledit.value
@@ -168,7 +167,7 @@ const savePost = async (_id: any) => {
     alert('Fill in the text and title fields')
   }
 }
-const editPost = async (_id: any) => {
+const editPost = async (_id) => {
   if (editId.value == '') {
     editId.value = _id;
     let post = postsStore.findpost(_id);

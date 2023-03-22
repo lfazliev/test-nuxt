@@ -11,9 +11,18 @@
 // export default (req:any, res:any) => {
 //     res.end('Legacy handler')
 // }
+import client from '@/db'
+const db = client.db('blog', 'posts')
 
-export default defineEventHandler((event) => {
-    console.log(event)
+export default defineEventHandler(async (event) => {
+    // console.log(event.node.req.method)
+    console.log(event.context.user)
+    try {
+        const all = await db.find({}).toArray()
+        return { all }
+    } catch (e) {
+        return (e)
+    }
 })
 
 

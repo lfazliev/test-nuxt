@@ -1,3 +1,4 @@
+import mongo from './db'
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     css: ['@/assets/css/main.scss'],
@@ -10,4 +11,11 @@ export default defineNuxtConfig({
     pinia: {
         autoImports: ['defineStore', 'mapStores', ''],
     },
+    typescript: {
+        shim: false
+    },
+    hooks: [
+        { 'ready': async () => { await mongo.connect() } },
+        { 'close': () => { mongo.close() } }
+    ]
 })

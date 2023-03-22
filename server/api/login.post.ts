@@ -1,4 +1,4 @@
-import client from '@/server/api/db'
+import client from '@/db'
 const dbheader = client.db('blog', 'header');
 const dbtokens = client.db('blog', 'tokens')
 import jwt from 'jsonwebtoken';
@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
         const data = await readBody(event)
         const user = await dbheader.findOne({ login: data.login });
         if (!user) {
-            send(event, false)
+            return (false)
         }
         else {
             if (user.pwd == data.pwd) {
@@ -18,14 +18,14 @@ export default defineEventHandler(async (event) => {
                     'Authorization': token
                 }
                 )
-                send(event, true)
+                return (true)
             }
             else {
-                send(event, false)
+                return (false)
             }
         }
 
     } catch (e) {
-        send(event, { result: 'error', data: e })
+        return { result: 'error', data: e }
     }
 })

@@ -5,7 +5,7 @@
         <button type="submit" @click="sendUser()">Send</button>
     </form>
 </template>
-<script setup lang="ts">
+<script setup>
 
 let login = ref('')
 let pwd = ref('')
@@ -16,11 +16,12 @@ const sendUser = async () => {
     const data = new FormData();
     data.append("login", login.value.toLocaleLowerCase());
     data.append("pwd", pwd.value);
-    const response = await $fetch(`${dburl}/login`, {
+    const response = await useFetch(`${dburl}/login`, {
         method: "POST",
         body: data,
     });
-    const result = await response.text()
+    // const result = getBody(response)
+    console.log(result);
     if (result == 'true') {
         localStorage.setItem('token', response.headers.get('Authorization'))
         const emit = defineEmits(['changeIsAdmin'])
