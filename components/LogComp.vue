@@ -6,30 +6,31 @@
     </form>
 </template>
 <script setup>
-
+import { useAuthStore } from "@/stores/auth";
+const authStore = useAuthStore()
 let login = ref('')
 let pwd = ref('')
-const dburl = 'https://blog.lfazliev.com'
-// const dburl = 'http://localhost:3002'
-// props: ['isAdmin'],
+// const dburl = 'https://blog.lfazliev.com'
+const dburl = 'http://localhost:3000'
+
 const sendUser = async () => {
     const data = new FormData();
     data.append("login", login.value.toLocaleLowerCase());
     data.append("pwd", pwd.value);
-    const response = await useFetch(`${dburl}/login`, {
+    const response = await $fetch(`${dburl}/api/login`, {
+
         method: "POST",
         body: data,
     });
-    // const result = getBody(response)
-    console.log(result);
-    if (result == 'true') {
-        localStorage.setItem('token', response.headers.get('Authorization'))
-        const emit = defineEmits(['changeIsAdmin'])
-        emit('changeIsAdmin', true)
-    }
-    else {
-        console.log("wrong login or password");
-    }
+    console.log(response);
+    // if (result.value == true) {
+    //     localStorage.setItem('token', response.headers.get('Authorization'))
+    //     authStore.isAuth = true;
+
+    // }
+    // else {
+    //     console.log("wrong login or password");
+    // }
 }
 </script>
 <style lang = scss>

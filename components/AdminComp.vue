@@ -1,6 +1,6 @@
 <template>
     <div class="admin">
-        <button @click="$emit('changeIsAdmin', false)">Log out</button>
+        <button @click="authStore.isAuth = false">Log out</button>
         <input v-model="title" type="text" placeholder="Header" />
         <button @click="fileName = ''; file = null; src = '' " v-if="file">Delete an image</button>
         <input v-model="url" type="url" placeholder="Link for ex 'lfazlev.com'" />
@@ -17,6 +17,9 @@
 </template>
 <script setup>
 import { usePostsStore } from "../stores/posts";
+import { useAuthStore } from "../stores/auth";
+const postsStore = usePostsStore()
+const authStore = useAuthStore()
 const dburl = 'https://blog.lfazliev.com'
 // const dburl = 'http://localhost:3002'
 const date = ref(new Date().toLocaleDateString())
@@ -26,13 +29,9 @@ let url = ref("")
 let src = ref("")
 let file = ref(null)
 let fileName = ref("")
-// props: ['isAdmin'],
-onBeforeMount(async () => {
-    const data = await useFetch(`${dburl}/posts`);
-    const posts = data.all
-    console.log(posts);
-    postsStore.posts = posts;
-})
+const { data } = await useFetch(`${dburl}/api/posts`);
+postsStore.posts = data.value.all;
+
 const previewFiles = (event) => {
     const allowedTypes = ['image/jpg', 'image/png', 'image/gif', 'image/jpeg']
     const file = event.target.files[0]
@@ -75,8 +74,7 @@ const addPost = async () => {
             fileName.value = "Choose file";
         }
         else {
-            const emit = defineEmits(['changeIsAdmin'])
-            emit('changeIsAdmin', false)
+            authStore.isAuth = false
         }
     }
 }

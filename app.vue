@@ -2,11 +2,11 @@
   <main>
     <HeaderComp></HeaderComp>
     <div class=visibl>
-      <div v-if="isAdmin">
-        <AdminComp :isAdmin="isAdmin" @changeIsAdmin="changeIsAdmin"></AdminComp>
+      <div v-if="authStore.isAuth">
+        <AdminComp></AdminComp>
       </div>
       <div v-else class=logcont>
-        <LogComp v-if="showlogin" :isAdmin="isAdmin" @changeIsAdmin="changeIsAdmin"></LogComp>
+        <LogComp v-if="showlogin"></LogComp>
         <button @click="showlogin = !showlogin">{{ (showlogin == true) ? 'Hide login' : 'Login' }}</button>
       </div>
       <div class="postline">
@@ -55,7 +55,9 @@
 
 <script setup>
 import { usePostsStore } from "./stores/posts";
+import { useAuthStore } from "./stores/auth";
 const postsStore = usePostsStore()
+const authStore = useAuthStore()
 let showlogin = ref(false)
 let isAdmin = ref(false)
 // const dburl = 'https://blog.lfazliev.com'
@@ -67,22 +69,18 @@ let editId = ref("")
 let fileEditName = ref("")
 let editSrc = ref("")
 let fileEdit = reactive({})
+const { data } = await useFetch(`${dburl}/api/posts`);
+postsStore.posts = data.value.all;
 onBeforeMount(async () => {
-  const data = await fetch(`${dburl}/api/posts`);
-  const posts = await data.json();
-  console.log(posts);
-
-  postsStore.posts = posts.all;
   const token = localStorage.getItem('token');
-  const response = await useFetch(`${dburl}/checkjwt`, {
+  const response = await $fetch(`${dburl}/api/checkjwt`, {
     headers: {
       "Content-Type": "application/json;charset=utf-8",
       "Authorization": token,
     },
     method: "POST",
   });
-  const result = await response.text()
-  if (result != 'false') {
+  if (response.auth) {
     isAdmin.value = true
   }
 })
@@ -111,7 +109,7 @@ const delPost = async (p) => {
   postsStore.delel(p._id)
   const token = localStorage.getItem('token')
   const headers = useRequestHeaders(['Authorization'])
-  const result = await useFetch(`${dburl}/posts`, {
+  const result = await useFetch(`${dburl}/api/posts`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json;charset=utf-8",
@@ -147,7 +145,7 @@ const savePost = async (_id) => {
     data.append("_id", post._id);
     editId.value = '';
     const token = localStorage.getItem('token');
-    const result = await fetch(`${dburl}/posts`, {
+    const result = await fetch(`${dburl}/api/posts`, {
       headers: {
         "Authorization": token,
       },
