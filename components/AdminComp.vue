@@ -1,6 +1,6 @@
 <template>
     <div class="admin">
-        <button @click="authStore.isAuth = false">Log out</button>
+        <button @click="logout()">Log out</button>
         <input v-model="title" type="text" placeholder="Header" />
         <button @click="fileName = ''; file = null; src = '' " v-if="file">Delete an image</button>
         <input v-model="url" type="url" placeholder="Link for ex 'lfazlev.com'" />
@@ -16,6 +16,7 @@
     </div>
 </template>
 <script setup>
+import nuxtStorage from 'nuxt-storage';
 import { usePostsStore } from "../stores/posts";
 import { useAuthStore } from "../stores/auth";
 const postsStore = usePostsStore()
@@ -29,9 +30,10 @@ let url = ref("")
 let src = ref("")
 let file = ref(null)
 let fileName = ref("")
-const { data } = await useFetch(`${dburl}/api/posts`);
-postsStore.posts = data.value.all;
-
+const logout = () => {
+    nuxtStorage.localStorage.removeItem('token')
+    authStore.isAuth = false
+}
 const previewFiles = (event) => {
     const allowedTypes = ['image/jpg', 'image/png', 'image/gif', 'image/jpeg']
     const file = event.target.files[0]
@@ -56,8 +58,8 @@ const addPost = async () => {
         data.append("text", text.value);
         data.append("url", url.value);
         data.append('date', date.value)
-        const token = localStorage.getItem('token');
-        const result = await useFetch(`${dburl}/posts`, {
+        const token = nuxtStorage.localStorage.getData.getItem('token');
+        const result = await useFetch(`${dburl}/api/posts`, {
             method: "POST",
             headers: {
                 "Authorization": token

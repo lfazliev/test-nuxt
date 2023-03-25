@@ -6,6 +6,7 @@
     </form>
 </template>
 <script setup>
+import nuxtStorage from 'nuxt-storage';
 import { useAuthStore } from "@/stores/auth";
 const authStore = useAuthStore()
 let login = ref('')
@@ -14,23 +15,19 @@ let pwd = ref('')
 const dburl = 'http://localhost:3000'
 
 const sendUser = async () => {
-    const data = new FormData();
-    data.append("login", login.value.toLocaleLowerCase());
-    data.append("pwd", pwd.value);
-    const response = await $fetch(`${dburl}/api/login`, {
-
+    const data = { 'login': login.value.toLocaleLowerCase(), "pwd": pwd.value }
+    await useFetch(`${dburl}/api/login`, {
         method: "POST",
         body: data,
-    });
-    console.log(response);
-    // if (result.value == true) {
-    //     localStorage.setItem('token', response.headers.get('Authorization'))
-    //     authStore.isAuth = true;
-
-    // }
-    // else {
-    //     console.log("wrong login or password");
-    // }
+        onResponse({ response }) {
+            if (response._data) {
+                nuxtStorage.localStorage.setData('token', response.headers.get('Authorization'), 7, 'd');
+                authStore.isAuth = true;
+            } else {
+                console.log("wrong login or password");
+            }
+        },
+    })
 }
 </script>
 <style lang = scss>

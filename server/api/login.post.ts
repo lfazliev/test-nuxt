@@ -5,8 +5,6 @@ import jwt from 'jsonwebtoken';
 export default defineEventHandler(async (event) => {
     try {
         const data = await readBody(event)
-        console.log(data);
-        return { login: data.login, pass: data.pass }
         const user = await dbheader.findOne({ login: data.login });
         if (!user) {
             return (false)

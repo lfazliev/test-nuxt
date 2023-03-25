@@ -24,7 +24,7 @@
           </div>
           <div v-if="editId != p._id" style="display: flex; justify-content: space-between;">
             <a class=btnpost :href="'https://' + p.url"><button v-if="Boolean(p.url)"> Сlick link</button></a>
-            <div v-if="isAdmin">
+            <div v-if="authStore.isAuth">
               <button class="btnact" @click="delPost(p)">
                 <img src="./assets/img/trashimg.svg" />
               </button>
@@ -54,12 +54,12 @@
 </template>
 
 <script setup>
+import nuxtStorage from 'nuxt-storage';
 import { usePostsStore } from "./stores/posts";
 import { useAuthStore } from "./stores/auth";
 const postsStore = usePostsStore()
 const authStore = useAuthStore()
 let showlogin = ref(false)
-let isAdmin = ref(false)
 // const dburl = 'https://blog.lfazliev.com'
 const dburl = 'http://localhost:3000'
 let titledit = ref("")
@@ -69,31 +69,31 @@ let editId = ref("")
 let fileEditName = ref("")
 let editSrc = ref("")
 let fileEdit = reactive({})
-const { data } = await useFetch(`${dburl}/api/posts`);
-postsStore.posts = data.value.all;
-onBeforeMount(async () => {
-  const token = localStorage.getItem('token');
-  const response = await $fetch(`${dburl}/api/checkjwt`, {
+await useFetch(`${dburl}/api/posts`, {
+  method: "GET",
+  onResponse({ response }) {
+    postsStore.posts = response._data.all
+  }
+});
+
+
+onMounted(async () => {
+  const token = nuxtStorage.localStorage.getData('token');
+  await useFetch(`${dburl}/api/checkjwt`, {
     headers: {
       "Content-Type": "application/json;charset=utf-8",
       "Authorization": token,
     },
     method: "POST",
+    onResponse({ response }) {
+      if (response._data.auth) {
+        authStore.isAuth = true
+      }
+    }
   });
-  if (response.auth) {
-    isAdmin.value = true
-  }
 })
-const logout = () => {
-  localStorage.removeItem('token')
-  isAdmin.value = false
-}
-const changeIsAdmin = (newValue) => {
-  if (newValue == false) {
-    localStorage.removeItem('token')
-  }
-  isAdmin.value = newValue
-}
+
+
 const previewEditFiles = (event) => {
   const allowedTypes = ['image/jpg', 'image/png', 'image/gif', 'image/jpeg']
   const file = event.target.files[0]
@@ -107,9 +107,9 @@ const previewEditFiles = (event) => {
 }
 const delPost = async (p) => {
   postsStore.delel(p._id)
-  const token = localStorage.getItem('token')
+  const token = nuxtStorage.localStorage.getData('token')
   const headers = useRequestHeaders(['Authorization'])
-  const result = await useFetch(`${dburl}/api/posts`, {
+  const { data: result } = await useFetch(`${dburl}/api/posts`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json;charset=utf-8",
@@ -120,7 +120,7 @@ const delPost = async (p) => {
   );
   const insertRes = await result
   if (insertRes == false) {
-    isAdmin.value = false
+    authStore.isAuth = false
   }
 }
 const savePost = async (_id) => {
@@ -144,7 +144,7 @@ const savePost = async (_id) => {
     data.append("url", post.url);
     data.append("_id", post._id);
     editId.value = '';
-    const token = localStorage.getItem('token');
+    const token = nuxtStorage.localStorage.getData('token');
     const result = await fetch(`${dburl}/api/posts`, {
       headers: {
         "Authorization": token,
@@ -154,7 +154,7 @@ const savePost = async (_id) => {
     })
     const insertRes = await result.json()
     if (insertRes == 'false') {
-      isAdmin.value = false
+      authStore.isAuth = false
     }
     if (fileEdit) {
       post.src = editSrc.value
