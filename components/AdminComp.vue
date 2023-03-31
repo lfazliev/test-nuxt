@@ -58,7 +58,7 @@ const addPost = async () => {
         data.append("text", text.value);
         data.append("url", url.value);
         data.append('date', date.value)
-        const token = nuxtStorage.localStorage.getData.getItem('token');
+        const token = nuxtStorage.localStorage.getData('token');
         const result = await useFetch(`${dburl}/api/posts`, {
             method: "POST",
             headers: {
@@ -66,18 +66,18 @@ const addPost = async () => {
             },
             body: data,
         });
-        const insertRes = await result.json();
-        if (insertRes != 'false') {
-            postsStore.createPost(title.value, date.value, text.value, url.value, src.value, insertRes.result.insertedId)
-            title.value = "";
-            text.value = "";
-            url.value = "";
-            file.value = null;
-            fileName.value = "Choose file";
-        }
-        else {
-            authStore.isAuth = false
-        }
+        // const insertRes = await result.json();
+        // if (insertRes != 'false') {
+        //     postsStore.createPost(title.value, date.value, text.value, url.value, src.value, insertRes.result.insertedId)
+        //     title.value = "";
+        //     text.value = "";
+        //     url.value = "";
+        //     file.value = null;
+        //     fileName.value = "Choose file";
+        // }
+        // else {
+        //     authStore.isAuth = false
+        // }
     }
 }
 </script>

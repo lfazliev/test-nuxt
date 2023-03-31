@@ -10,7 +10,6 @@ router.get('/posts', defineEventHandler(async () => {
 router.post('/posts', defineEventHandler(async (event) => {
     const user = event.context.user
     if (user) {
-
         // let filedata = event.node.req.file
         // if (!request.file) {
         //     delete request.body.file
