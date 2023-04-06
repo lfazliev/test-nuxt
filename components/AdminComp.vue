@@ -21,14 +21,14 @@ import { usePostsStore } from "../stores/posts";
 import { useAuthStore } from "../stores/auth";
 const postsStore = usePostsStore()
 const authStore = useAuthStore()
-const dburl = 'https://blog.lfazliev.com'
-// const dburl = 'http://localhost:3002'
+// const dburl = 'https://blog.lfazliev.com'
+const dburl = 'http://localhost:3000'
 const date = ref(new Date().toLocaleDateString())
 let title = ref("")
 let text = ref("")
 let url = ref("")
 let src = ref("")
-let file = ref(null)
+let file = ref()
 let fileName = ref("")
 const logout = () => {
     nuxtStorage.localStorage.removeItem('token')
@@ -36,12 +36,12 @@ const logout = () => {
 }
 const previewFiles = (event) => {
     const allowedTypes = ['image/jpg', 'image/png', 'image/gif', 'image/jpeg']
-    const file = event.target.files[0]
-    if (allowedTypes.includes(file.type)) {
-        const fileExtension = file.name.split('.').pop();
-        const editFile = new File([file], `${new Date().getTime()}.${fileExtension}`, { type: file.type })
+    const filee = event.target.files[0]
+    if (allowedTypes.includes(filee.type)) {
+        const fileExtension = filee.name.split('.').pop();
+        const editFile = new File([filee], `${new Date().getTime()}.${fileExtension}`, { type: filee.type })
         file.value = editFile;
-        fileName.value = file.name;
+        fileName.value = filee.name;
         src.value = editFile.name;
     }
 }
@@ -51,35 +51,32 @@ const addPost = async () => {
         if (file.value) {
             data.append("file", file.value);
         }
-        else {
-            data.append("file", '');
-        }
         data.append("title", title.value);
         data.append("text", text.value);
         data.append("url", url.value);
         data.append('date', date.value)
         const token = nuxtStorage.localStorage.getData('token');
-        const result = await useFetch(`${dburl}/api/posts`, {
+        const { data: result } = await useFetch(`${dburl}/api/posts`, {
             method: "POST",
             headers: {
                 "Authorization": token
             },
             body: data,
         });
-        // const insertRes = await result.json();
-        // if (insertRes != 'false') {
-        //     postsStore.createPost(title.value, date.value, text.value, url.value, src.value, insertRes.result.insertedId)
-        //     title.value = "";
-        //     text.value = "";
-        //     url.value = "";
-        //     file.value = null;
-        //     fileName.value = "Choose file";
-        // }
-        // else {
-        //     authStore.isAuth = false
-        // }
+        if (result.value != 'false') {
+            postsStore.createPost(title.value, date.value, text.value, url.value, src.value, result.value.result.insertedId)
+            title.value = "";
+            text.value = "";
+            url.value = "";
+            file.value = null;
+            fileName.value = "Choose file";
+        }
+        else {
+            authStore.isAuth = false
+        }
     }
 }
+
 </script>
 
 

@@ -1,6 +1,8 @@
 import fs from 'fs'
 import { ObjectId } from 'mongodb'
+import useFiles from '~~/helpers/useFiles'
 import client from '@/db'
+import path from 'path'
 const db = client.db('blog', 'posts')
 const router = createRouter()
 router.get('/posts', defineEventHandler(async () => {
@@ -10,12 +12,20 @@ router.get('/posts', defineEventHandler(async () => {
 router.post('/posts', defineEventHandler(async (event) => {
     const user = event.context.user
     if (user) {
-        // let filedata = event.node.req.file
-        // if (!request.file) {
-        //     delete request.body.file
-        // }
-        // const res = await db.insertOne({ ...request.body, src: (filedata) ? filedata.originalname : '' })
-        // return ({ result: res })
+        await useFiles(event)
+        let data = event.context.fields
+        let filename = event.context.fileName
+        if (filename) {
+            console.log(filename);
+        }
+        if (data) {
+            const res = await db.insertOne({ ...data, src: (filename) ? filename : '' })
+            return ({ result: res })
+        }
+        else {
+            console.log("res without data");
+
+        }
 
     }
     else {
@@ -23,40 +33,48 @@ router.post('/posts', defineEventHandler(async (event) => {
     }
 }))
 router.put('/posts', defineEventHandler(async (event) => {
-    const user = event.context.user
-    const data = await readBody(event)
-    console.log(data);
+    try {
+        const user = event.context.user
+        if (user) {
+            await useFiles(event)
+            let data = event.context.fields
+            let filename = event.context.fileName
+            const _id = data._id
+            if ((data.src && filename) || data.file == 'delete') {
+                const src = path.join(process.cwd(), 'public', data.src)
+                fs.unlinkSync(src)
 
-    // const da = data.p._id
-    if (user) {
-        // let filedata = event.node.req.file;
-        // if ((data.src && filedata) || data.file == 'delete') {
-        //     fs.unlinkSync(`../client/src/assets/${data.src}`)
-        //     fs.unlinkSync(`../public/assets/${data.src}`)
-
-        // }
-        // const res = await db.updateOne({ _id: new ObjectId(data._id) }, { $set: { title: data.title, text: data.text, url: data.url, src: (filedata) ? filedata.originalname : ((data.file == 'delete') ? '' : data.src) } })
-        // return ({ result: res })
+            }
+            const res = await db.updateOne({ _id: new ObjectId(data._id) }, { $set: { title: data.title, text: data.text, url: data.url, src: (filename) ? filename : ((data.file == 'delete') ? '' : data.src) } })
+            return ({ result: res })
+        }
+        else {
+            return (false)
+        }
     }
-    else {
-        return (false)
+    catch (e) {
+        return ({ result: e })
     }
 }))
 router.delete('/posts', defineEventHandler(async (event) => {
-    const user = event.context.user
-    const body = await readBody(event)
-    const _id = body.p._id
-    if (user) {
-
-        // const res = await db.deleteOne({ _id: new ObjectId(_id) })
-        // if (request.body.p.src) {
-        //     // fs.unlinkSync(`../client/src/assets/${request.body.p.src}`)
-        //     fs.unlinkSync(`../public/assets/${request.body.p.src}`)
-        // }
-        return ({ result: res })
+    try {
+        const user = event.context.user
+        const body = await readBody(event)
+        const _id = body.p._id
+        if (user) {
+            const res = await db.deleteOne({ _id: new ObjectId(_id) })
+            if (body.p.src) {
+                const src = path.join(process.cwd(), 'public', body.p.src)
+                fs.unlinkSync(src)
+            }
+            return ({ result: res })
+        }
+        else {
+            return (false)
+        }
     }
-    else {
-        return (false)
+    catch (e) {
+        return ({ result: e })
     }
 }))
 

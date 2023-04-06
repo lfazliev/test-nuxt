@@ -19,7 +19,7 @@
           </p>
           <textarea v-else placeholder="Text" v-model="textedit"></textarea>
           <div class="imgConteiner" v-if="Boolean(p.src)">
-            <img :src="dburl + '/assets/' + p.src" />
+            <img :src="dburl + '/' + p.src" />
             <!-- <img :src="'http://localhost:5173/src/assets/' + p.src" /> -->
           </div>
           <div v-if="editId != p._id" style="display: flex; justify-content: space-between;">
@@ -68,7 +68,7 @@ let urledit = ref("")
 let editId = ref("")
 let fileEditName = ref("")
 let editSrc = ref("")
-let fileEdit = reactive({})
+let fileEdit = ref()
 await useFetch(`${dburl}/api/posts`, {
   method: "GET",
   onResponse({ response }) {
@@ -100,7 +100,7 @@ const previewEditFiles = (event) => {
   if (allowedTypes.includes(file.type)) {
     const fileExtension = file.name.split('.').pop();
     const editFile = new File([file], `${new Date().getTime()}.${fileExtension}`, { type: file.type })
-    fileEdit = editFile
+    fileEdit.value = editFile
     fileEditName.value = file.name;
     editSrc.value = editFile.name;
   }
@@ -108,18 +108,16 @@ const previewEditFiles = (event) => {
 const delPost = async (p) => {
   postsStore.delel(p._id)
   const token = nuxtStorage.localStorage.getData('token')
-  const headers = useRequestHeaders(['Authorization'])
   const { data: result } = await useFetch(`${dburl}/api/posts`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json;charset=utf-8",
       "Authorization": token,
     },
-    body: JSON.stringify({ p }),
+    body: { p },
   }
   );
-  const insertRes = await result
-  if (insertRes == false) {
+  if (result.value == false) {
     authStore.isAuth = false
   }
 }
@@ -136,7 +134,7 @@ const savePost = async (_id) => {
       post.src = ''
     }
     else {
-      data.append("file", (fileEdit) ? fileEdit : null);
+      data.append("file", (fileEdit.value) ? fileEdit.value : null);
     }
     data.append("title", post.title);
     data.append("text", post.text);
@@ -156,10 +154,9 @@ const savePost = async (_id) => {
     if (insertRes == 'false') {
       authStore.isAuth = false
     }
-    if (fileEdit) {
+    if (fileEdit.value) {
       post.src = editSrc.value
     }
-    fileEdit = File
   }
   else {
     alert('Fill in the text and title fields')
