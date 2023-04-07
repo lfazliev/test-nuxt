@@ -10,26 +10,31 @@ router.get('/posts', defineEventHandler(async () => {
     return { all }
 }))
 router.post('/posts', defineEventHandler(async (event) => {
-    const user = event.context.user
-    if (user) {
-        await useFiles(event)
-        let data = event.context.fields
-        let filename = event.context.fileName
-        if (filename) {
-            console.log(filename);
-        }
-        if (data) {
-            const res = await db.insertOne({ ...data, src: (filename) ? filename : '' })
-            return ({ result: res })
+    try {
+        const user = event.context.user
+        if (user) {
+            await useFiles(event)
+            let data = event.context.fields
+            let filename = event.context.fileName
+            if (filename) {
+                console.log(filename);
+            }
+            if (data) {
+                const res = await db.insertOne({ ...data, src: (filename) ? filename : '' })
+                return ({ result: res })
+            }
+            else {
+                console.log("res without data");
+
+            }
+
         }
         else {
-            console.log("res without data");
-
+            return ({ result: 'user', data: false })
         }
-
     }
-    else {
-        return (false)
+    catch (e) {
+        return ({ result: 'error', data: e })
     }
 }))
 router.put('/posts', defineEventHandler(async (event) => {
@@ -49,11 +54,11 @@ router.put('/posts', defineEventHandler(async (event) => {
             return ({ result: res })
         }
         else {
-            return (false)
+            return ({ result: false })
         }
     }
     catch (e) {
-        return ({ result: e })
+        return ({ result: 'error', data: e })
     }
 }))
 router.delete('/posts', defineEventHandler(async (event) => {
@@ -70,11 +75,11 @@ router.delete('/posts', defineEventHandler(async (event) => {
             return ({ result: res })
         }
         else {
-            return (false)
+            return ({ result: false })
         }
     }
     catch (e) {
-        return ({ result: e })
+        return ({ result: 'error', data: e })
     }
 }))
 

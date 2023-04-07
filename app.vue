@@ -54,7 +54,6 @@
 </template>
 
 <script setup>
-import nuxtStorage from 'nuxt-storage';
 import { usePostsStore } from "./stores/posts";
 import { useAuthStore } from "./stores/auth";
 const postsStore = usePostsStore()
@@ -78,7 +77,10 @@ await useFetch(`${dburl}/api/posts`, {
 
 
 onMounted(async () => {
-  const token = nuxtStorage.localStorage.getData('token');
+  let token
+  if (process.client) {
+    token = localStorage.getItem('token')
+  }
   await useFetch(`${dburl}/api/checkjwt`, {
     headers: {
       "Content-Type": "application/json;charset=utf-8",
@@ -107,7 +109,10 @@ const previewEditFiles = (event) => {
 }
 const delPost = async (p) => {
   postsStore.delel(p._id)
-  const token = nuxtStorage.localStorage.getData('token')
+  let token
+  if (process.client) {
+    token = localStorage.getItem('token')
+  }
   const { data: result } = await useFetch(`${dburl}/api/posts`, {
     method: "DELETE",
     headers: {
@@ -142,7 +147,10 @@ const savePost = async (_id) => {
     data.append("url", post.url);
     data.append("_id", post._id);
     editId.value = '';
-    const token = nuxtStorage.localStorage.getData('token');
+    let token
+    if (process.client) {
+      token = localStorage.getItem('token')
+    }
     const result = await fetch(`${dburl}/api/posts`, {
       headers: {
         "Authorization": token,

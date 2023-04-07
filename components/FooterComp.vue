@@ -35,6 +35,7 @@
 footer {
     background-color: rgb(126, 110, 68);
     width: 90%;
+    min-height: 20vh;
     padding: 3vw 5%;
 
     >p {

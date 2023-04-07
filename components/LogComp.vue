@@ -6,7 +6,6 @@
     </form>
 </template>
 <script setup>
-import nuxtStorage from 'nuxt-storage';
 import { useAuthStore } from "@/stores/auth";
 const authStore = useAuthStore()
 let login = ref('')
@@ -21,7 +20,9 @@ const sendUser = async () => {
         body: data,
         onResponse({ response }) {
             if (response._data) {
-                nuxtStorage.localStorage.setData('token', response.headers.get('Authorization'), 7, 'd');
+                if (process.client) {
+                    localStorage.setItem('token', response.headers.get('Authorization'))
+                }
                 authStore.isAuth = true;
             } else {
                 console.log("wrong login or password");

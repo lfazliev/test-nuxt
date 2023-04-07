@@ -16,7 +16,6 @@
     </div>
 </template>
 <script setup>
-import nuxtStorage from 'nuxt-storage';
 import { usePostsStore } from "../stores/posts";
 import { useAuthStore } from "../stores/auth";
 const postsStore = usePostsStore()
@@ -31,7 +30,9 @@ let src = ref("")
 let file = ref()
 let fileName = ref("")
 const logout = () => {
-    nuxtStorage.localStorage.removeItem('token')
+    if (process.client) {
+        localStorage.removeItem('token')
+    }
     authStore.isAuth = false
 }
 const previewFiles = (event) => {
@@ -55,7 +56,11 @@ const addPost = async () => {
         data.append("text", text.value);
         data.append("url", url.value);
         data.append('date', date.value)
-        const token = nuxtStorage.localStorage.getData('token');
+        let token
+        if (process.client) {
+            token = localStorage.getItem('token')
+        }
+
         const { data: result } = await useFetch(`${dburl}/api/posts`, {
             method: "POST",
             headers: {
