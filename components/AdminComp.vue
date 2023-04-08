@@ -37,12 +37,12 @@ const logout = () => {
 }
 const previewFiles = (event) => {
     const allowedTypes = ['image/jpg', 'image/png', 'image/gif', 'image/jpeg']
-    const filee = event.target.files[0]
-    if (allowedTypes.includes(filee.type)) {
-        const fileExtension = filee.name.split('.').pop();
-        const editFile = new File([filee], `${new Date().getTime()}.${fileExtension}`, { type: filee.type })
+    const filebuf = event.target.files[0]
+    if (allowedTypes.includes(filebuf.type)) {
+        const fileExtension = filebuf.name.split('.').pop();
+        const editFile = new File([filebuf], `${new Date().getTime()}.${fileExtension}`, { type: filebuf.type })
         file.value = editFile;
-        fileName.value = filee.name;
+        fileName.value = filebuf.name;
         src.value = editFile.name;
     }
 }
@@ -68,7 +68,8 @@ const addPost = async () => {
             },
             body: data,
         });
-        if (result.value != 'false') {
+        console.log(result);
+        if (result.value != false) {
             postsStore.createPost(title.value, date.value, text.value, url.value, src.value, result.value.result.insertedId)
             title.value = "";
             text.value = "";
