@@ -28,7 +28,7 @@
             </ul>
         </div>
         <hr>
-        <p style="color: white">Fazliev Lenar 2022</p>
+        <p style="color: white">Fazliev Lenar 2023</p>
     </footer>
 </template>
 <style  lang = 'scss'>
