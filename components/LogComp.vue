@@ -10,8 +10,8 @@ import { useAuthStore } from "@/stores/auth";
 const authStore = useAuthStore()
 let login = ref('')
 let pwd = ref('')
-// const dburl = 'https://blog.lfazliev.com'
-const dburl = 'http://localhost:3000'
+const dburl = 'https://blog.lfazliev.com'
+// const dburl = 'http://localhost:3000'
 
 const sendUser = async () => {
     const data = { 'login': login.value.toLocaleLowerCase(), "pwd": pwd.value }

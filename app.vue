@@ -19,8 +19,7 @@
           </p>
           <textarea v-else placeholder="Text" v-model="textedit"></textarea>
           <div class="imgConteiner" v-if="Boolean(p.src)">
-            <img :src="dburl + '/' + p.src" />
-            <!-- <img :src="'http://localhost:5173/src/assets/' + p.src" /> -->
+            <nuxt-img :src="'/' + p.src" />
           </div>
           <div v-if="editId != p._id" style="display: flex; justify-content: space-between;">
             <a class=btnpost :href="'https://' + p.url"><button v-if="Boolean(p.url)"> Сlick link</button></a>
@@ -59,8 +58,8 @@ import { useAuthStore } from "./stores/auth";
 const postsStore = usePostsStore()
 const authStore = useAuthStore()
 let showlogin = ref(false)
-// const dburl = 'https://blog.lfazliev.com'
-const dburl = 'http://localhost:3000'
+const dburl = 'https://blog.lfazliev.com'
+// const dburl = 'http://localhost:3000'
 let titledit = ref("")
 let textedit = ref("")
 let urledit = ref("")

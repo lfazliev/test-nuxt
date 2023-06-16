@@ -2,7 +2,7 @@
     <div class="admin">
         <button @click="logout()">Log out</button>
         <input v-model="title" type="text" placeholder="Header" />
-        <button @click="fileName = ''; file = null; src = '' " v-if="file">Delete an image</button>
+        <button @click="fileName = ''; file = null; src = ''" v-if="file">Delete an image</button>
         <input v-model="url" type="url" placeholder="Link for ex 'lfazlev.com'" />
         <div>
             <input type="file" id="file1" accept="image/*" @change="previewFiles" class="filest" />
@@ -20,8 +20,8 @@ import { usePostsStore } from "../stores/posts";
 import { useAuthStore } from "../stores/auth";
 const postsStore = usePostsStore()
 const authStore = useAuthStore()
-// const dburl = 'https://blog.lfazliev.com'
-const dburl = 'http://localhost:3000'
+const dburl = 'https://blog.lfazliev.com'
+// const dburl = 'http://localhost:3000'
 const date = ref(new Date().toLocaleDateString())
 let title = ref("")
 let text = ref("")
