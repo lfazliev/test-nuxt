@@ -19,7 +19,7 @@
           </p>
           <textarea v-else placeholder="Text" v-model="textedit"></textarea>
           <div class="imgConteiner" v-if="Boolean(p.src)">
-            <nuxt-img :src="'/' + p.src" />
+            <nuxt-picture :src="'/' + p.src" />
           </div>
           <div v-if="editId != p._id" style="display: flex; justify-content: space-between;">
             <a class=btnpost :href="'https://' + p.url"><button v-if="Boolean(p.url)"> Сlick link</button></a>
